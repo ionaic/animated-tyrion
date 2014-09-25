@@ -31,14 +31,7 @@ bool fequals(float a, float b, float epsilon) {
 }
 
 void main(void) {
-    //// calculate the distance from the spheres
-    //vec4 diffL = sphereLpos - vs_Pos;
-    //vec4 diffC = sphereCpos - vs_Pos;
-    //vec4 diffR = sphereRpos - vs_Pos;
-    //vec3 vs_distToSpheres = vec3(sqrt(dot(diffL, diffL)), 
-    //                        sqrt(dot(diffC, diffC)),
-    //                        sqrt(dot(diffR, diffR)));
-
+/*
     float nRipplesAffecting;
     float idx_amt = 1.0f / nRipples;
 
@@ -57,17 +50,12 @@ void main(void) {
         //
         // this is modified by the attenuation
         nRipplesAffecting += float(fequals(vs_distToSpheres[sphereIdx], rippleLookup.y, rippleLookup.x)) * rippleAtten;
-        //nRipplesAffecting += float(fequals(vs_distToSpheres[sphereIdx], rippleLookup.y, rippleLookup.x));
     }
 
     // find the color modification for this spot and add it to the color, this
     // is a flat increase in lightness (adding white light)
     nRipplesAffecting = float(fequals(vs_distToSpheres[0], 100.0f, 4.0f)) * (1.0 - (100.0f / rippleAttenDist));
     out_Color = clamp(vs_Color + vec4(bandStrength * nRipplesAffecting), 0.0f, 1.0f);
+*/
     out_Color = texture(ripples, vec2(0.0f)) / 255.0;
-    //out_Color = vec4(normalize(vs_distToSpheres), 1.0f);
-    //out_Color = vec4((vs_distToSpheres/1000), 1.0f);
-
-    //out_Color = vec4(gl_FragCoord.xy / floor(screenDim / nRipples), 0.0, 1.0);;
-    //out_Color = texture(ripples, vec2(0, 0));
 }
