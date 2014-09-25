@@ -29,6 +29,8 @@ class ofApp : public ofBaseApp {
 
         void exit(ofEventArgs &args);
 
+        void printRipples();
+
     private:
         void ripplesToTexture();
 

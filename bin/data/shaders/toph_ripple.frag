@@ -31,19 +31,19 @@ bool fequals(float a, float b, float epsilon) {
 }
 
 void main(void) {
-/*
+
     float nRipplesAffecting;
-    float idx_amt = 1.0f / nRipples;
 
     // find out how many ripples are affecting this spot currently
     for (int i = 0; i < nRipples; ++i) {
         // look up the current ripple
-        vec3 rippleLookup = texture(ripples, clamp(vec2(idx_amt * float(i), 0.0f), 0.0f, 1.0f)).xyz;
+        vec3 rippleLookup = texelFetch(ripples, i).xyz;
 
         // get the origin index
         int sphereIdx = int(rippleLookup.z);
 
-        float rippleAtten = 1.0 - (rippleLookup.x / rippleAttenDist);
+        //float rippleAtten = 1.0 - (rippleLookup.x / rippleAttenDist);
+        float rippleAtten = 1.0;
 
         // if the distance from the appropriate sphere is the same as the
         // current radius, then this ripple is affecting this fragment
@@ -56,8 +56,8 @@ void main(void) {
     // is a flat increase in lightness (adding white light)
     nRipplesAffecting = float(fequals(vs_distToSpheres[0], 100.0f, 4.0f)) * (1.0 - (100.0f / rippleAttenDist));
     out_Color = clamp(vs_Color + vec4(bandStrength * nRipplesAffecting), 0.0f, 1.0f);
-*/
-    out_Color = texelFetch(ripples, 0);
+
+    //out_Color = texelFetch(ripples, 0);
     //out_Color = vec4(0.0, 1.0, 0.0, 1.0);
     //gl_FragColor = out_color;
 }
