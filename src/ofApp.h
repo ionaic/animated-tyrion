@@ -7,6 +7,7 @@ struct Ripple {
     float width;
     float radius;
     float origin;
+    float alphaPad;
 };
 
 class ofApp : public ofBaseApp {
@@ -48,7 +49,7 @@ class ofApp : public ofBaseApp {
         float minBandwidth; // the minimum width that we draw
         float rippleSpeed; // how fast the ripples expand outward
         std::list<Ripple> ripples;
-        //ofImage rippleImg;
 
         GLuint rippleTexID;
+        GLuint rippleTexBuffer;
 };

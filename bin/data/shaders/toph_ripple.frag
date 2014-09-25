@@ -57,5 +57,5 @@ void main(void) {
     nRipplesAffecting = float(fequals(vs_distToSpheres[0], 100.0f, 4.0f)) * (1.0 - (100.0f / rippleAttenDist));
     out_Color = clamp(vs_Color + vec4(bandStrength * nRipplesAffecting), 0.0f, 1.0f);
 */
-    out_Color = texture(ripples, vec2(0.0f)) / 255.0;
+    out_Color = texture(ripples, vec2(0.0f));
 }

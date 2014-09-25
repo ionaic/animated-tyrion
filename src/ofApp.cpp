@@ -138,15 +138,25 @@ void ofApp::ripplesToTexture() {
     //    rippleTex.setColor((int)idx, 0, ofColor(itr->width, itr->radius, itr->origin));
     //}
     std::vector<Ripple> rippleData;
-    Ripple tmp = {51.0, 51.0, 255.0};
+    Ripple tmp = {255.0, 0.0, 0.0, 1.0};
     for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
         //rippleData.push_back(*itr);
         rippleData.push_back(tmp);
     }
 
+    // make the ripple buffer
+    glGenBuffers(1, &rippleTexBuffer);
+    // bind to GL_TEXTURE_BUFFER
+    glBindBuffer(GL_TEXTURE_BUFFER, rippleTexBuffer);
+    // specify buffer data
+    glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * 4 * rippleData.size(), &rippleData[0], GL_STATIC_DRAW);
+
     // bind the rippleTexture
-    glBindTexture( GL_TEXTURE_2D, rippleTexID );
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_BUFFER, rippleTexID );
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, rippleTexBuffer);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
+    //glTexImage2D(GL_TEXTURE_BUFFER, 0, GL_RGB, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
 
     // update the image
     //rippleImg.setFromPixels(rippleTex);
@@ -194,6 +204,10 @@ void ofApp::draw() {
     //light.disable();
 
     shader.end();
+
+    ofTexture tmpTex;
+    tmpTex.setUseExternalTextureID(rippleTexID);
+    tmpTex.draw(0, 0, ofGetWidth(), ofGetHeight());
 
     camera.end();
 }
