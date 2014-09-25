@@ -14,6 +14,7 @@ uniform vec4 sphereRpos;
 
 // output variables (to fragment shader)
 out vec4 vs_Color; // pass through vertex color
+//out vec4 vs_Pos; // pass through the position for interpolation
 out vec3 vs_distToSpheres; // distance of the vertex to the 3 spheres
 
 void main(void) {
@@ -21,9 +22,12 @@ void main(void) {
     gl_Position = modelViewProjectionMatrix * position;
 
     // calculate the distance from the spheres
-    vs_distToSpheres = vec3(sqrt(dot(sphereLpos, position)), 
-                            sqrt(dot(sphereCpos, position)),
-                            sqrt(dot(sphereRpos, position)));
+    vec4 diffL = sphereLpos - position;
+    vec4 diffC = sphereCpos - position;
+    vec4 diffR = sphereRpos - position;
+    vs_distToSpheres = vec3(sqrt(dot(diffL, diffL)), 
+                            sqrt(dot(diffC, diffC)),
+                            sqrt(dot(diffR, diffR)));
 
     // output color to frag
     vs_Color = color;

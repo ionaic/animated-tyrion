@@ -26,6 +26,7 @@ class ofApp : public ofBaseApp {
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+        void exit(ofEventArgs &args);
 
     private:
         void ripplesToTexture();
@@ -47,5 +48,7 @@ class ofApp : public ofBaseApp {
         float minBandwidth; // the minimum width that we draw
         float rippleSpeed; // how fast the ripples expand outward
         std::list<Ripple> ripples;
-        ofImage rippleImg;
+        //ofImage rippleImg;
+
+        GLuint rippleTexID;
 };

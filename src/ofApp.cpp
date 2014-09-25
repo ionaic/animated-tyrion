@@ -4,16 +4,20 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+    //ofSetVerticalSync(true); // might be causing a hang on exit?
+    //ofSetFrameRate(60); // causes segfault on exit
+
     // set up the band attributes
     bandStrength = 0.5f;
     rippleAttenDist = 500.0f;
     baseBandwidth = 10.0f;
-    minBandwidth = 1.0f;
-    rippleSpeed = 5.0f;
+    //minBandwidth = 10.1f;
+    minBandwidth = 200.0f;
+    rippleSpeed = 0.0f;
 
     // make sure we're using the image as a texture
-    rippleImg.allocate(1, 1, OF_IMAGE_COLOR_ALPHA);
-    rippleImg.setUseTexture(true);
+    //rippleImg.allocate(1, 1, OF_IMAGE_COLOR_ALPHA);
+    //rippleImg.setUseTexture(true);
 
     // set up the sound player, load the song file from the data folder
     player.loadSound("sounds/settledown.mp3");
@@ -33,15 +37,18 @@ void ofApp::setup() {
 
     // depth testing so then the z-ordering is right
     ofEnableDepthTest();
-    std::cout << light.getPosition() << std::endl;
+    //std::cout << light.getPosition() << std::endl;
     player.play();
+
+    // generate the texture we'll be using
+    glGenTextures( 1, &rippleTexID);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     float centerX = ofGetWidth() / 2, 
-          centerY = ofGetWidth() / 2,
-          thirdY = ofGetWidth() * 0.40;
+          centerY = ofGetHeight() / 2,
+          thirdY = ofGetHeight() * 0.40;
     sphereL.setPosition(centerX - 100,  thirdY, 0);
     sphereC.setPosition(centerX,        thirdY, 0);
     sphereR.setPosition(centerX + 100,  thirdY, 0);
@@ -53,29 +60,39 @@ void ofApp::update() {
     camera.lookAt(sphereC.getPosition());
 
     // get 3 bands to determine band sizes for the 3 
-    float *bands = ofSoundGetSpectrum(3);
-    sphereL.setRadius(10 * bands[0] + 10);
-    sphereC.setRadius(10 * bands[1] + 10);
-    sphereR.setRadius(10 * bands[2] + 10);
+    float *bands = ofSoundGetSpectrum(10);
+    float lband = bands[0],
+          cband = bands[1],
+          rband = bands[2];
+    for (unsigned int i = 3; i < 10; ++i) {
+        rband += bands[i];
+    }
+    sphereL.setRadius(10 * lband + 10);
+    sphereC.setRadius(10 * cband + 10);
+    sphereR.setRadius(10 * rband + 10);
+
+    lband *= baseBandwidth;
+    cband *= baseBandwidth;
+    rband *= baseBandwidth;
 
     Ripple tmp;
     tmp.radius = 1.0f; // this is in world coordinates
 
     // add any new bands
-    if (bands[0] * baseBandwidth > minBandwidth) {
-        tmp.width = bands[0] * baseBandwidth;
+    if (lband > minBandwidth) {
+        tmp.width = lband;
         tmp.origin = 0.0f;
 
         ripples.push_back(tmp);
     }
-    if (bands[1] * baseBandwidth > minBandwidth) {
-        tmp.width = bands[1] * baseBandwidth;
+    if (cband > minBandwidth) {
+        tmp.width = cband;
         tmp.origin = 1.0f;
 
         ripples.push_back(tmp);
     }
-    if (bands[2] * baseBandwidth > minBandwidth) {
-        tmp.width = bands[2] * baseBandwidth;
+    if (rband > minBandwidth) {
+        tmp.width = rband;
         tmp.origin = 2.0f;
 
         ripples.push_back(tmp);
@@ -111,19 +128,29 @@ void ofApp::ripplesToTexture() {
         return;
     }
 
-    // new ofPixels
-    ofPixels rippleTex;
+    // make vector of pixels
+    //ofPixels rippleTex;
 
-    rippleTex.allocate(ripples.size(), 1, OF_PIXELS_RGBA);
+    //rippleTex.allocate(ripples.size(), 1, OF_PIXELS_RGBA);
 
-    std::list<Ripple>::iterator itr = ripples.begin();
-    for (unsigned int idx = 0; itr != ripples.end() && idx < ripples.size(); ++itr, ++idx) {
-        rippleTex.setColor((int)idx, 0, ofColor(itr->width, itr->radius, itr->origin));
+    //std::list<Ripple>::iterator itr = ripples.begin();
+    //for (unsigned int idx = 0; itr != ripples.end() && idx < ripples.size(); ++itr, ++idx) {
+    //    rippleTex.setColor((int)idx, 0, ofColor(itr->width, itr->radius, itr->origin));
+    //}
+    std::vector<Ripple> rippleData;
+    Ripple tmp = {51.0, 51.0, 255.0};
+    for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
+        //rippleData.push_back(*itr);
+        rippleData.push_back(tmp);
     }
 
+    // bind the rippleTexture
+    glBindTexture( GL_TEXTURE_2D, rippleTexID );
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
+
     // update the image
-    rippleImg.setFromPixels(rippleTex);
-    rippleImg.update();
+    //rippleImg.setFromPixels(rippleTex);
+    //rippleImg.update();
 }
 
 //--------------------------------------------------------------
@@ -133,25 +160,29 @@ void ofApp::draw() {
 
     camera.begin();
 
-    //shader.begin();
+    shader.begin();
 
     ////light.enable();
 
-    //// set the shader uniforms for the sphere positions
-    //shader.setUniform4f("sphereLpos", sphereL.getX(), sphereL.getY(), sphereL.getZ(), 1.0f);
-    //shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
-    //shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
+    // set the shader uniforms for the sphere positions
+    shader.setUniform4f("sphereLpos", sphereL.getX(), sphereL.getY(), sphereL.getZ(), 1.0f);
+    shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
+    shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
 
-    //// set the uniform for the band strength and attenuation
-    //shader.setUniform1f("bandStrength", bandStrength);
-    //shader.setUniform1f("rippleAttenDist", rippleAttenDist);
-    //
-    //// set the number of ripples
-    //// arguments are: sampler name, image, texcoord location
+    // set the uniform for the band strength and attenuation
+    shader.setUniform1f("bandStrength", bandStrength);
+    shader.setUniform1f("rippleAttenDist", rippleAttenDist);
+    
+    // set the number of ripples
+    // arguments are: sampler name, image, texcoord location
 
-    //if (ripples.size() > 0) {
-    //    shader.setUniformTexture("ripples", rippleImg.getTextureReference(), 0);
-    //}
+    if (ripples.size() > 0) {
+        //shader.setUniformTexture("ripples", rippleImg.getTextureReference(), 0);
+        shader.setUniformTexture("ripples", GL_TEXTURE_2D, rippleTexID, 0);
+    }
+
+    shader.printActiveAttributes();
+    shader.printActiveUniforms();
 
     room.draw();
 
@@ -159,10 +190,10 @@ void ofApp::draw() {
     sphereC.draw();
     sphereR.draw();
 
-    rippleImg.getTextureReference().draw(0, 0, ofGetWidth(), ofGetHeight());
+    //rippleImg.getTextureReference().draw(0, 0, ofGetWidth(), ofGetHeight());
     //light.disable();
 
-    //shader.end();
+    shader.end();
 
     camera.end();
 }
@@ -210,4 +241,16 @@ void ofApp::gotMessage(ofMessage msg) {
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo) { 
 
+}
+
+//--------------------------------------------------------------
+void ofApp::exit(ofEventArgs &args) {
+    // attempting to clean up at the end, something in the sound player is
+    // dying on exit and isn't cleaned up
+
+    std::cout << "exiting" << std::endl;
+    ofSoundStopAll();
+    ofSoundShutdown();
+    //player.unloadSound();
+    //ofBaseApp::exit(args);
 }
