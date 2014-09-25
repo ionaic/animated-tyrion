@@ -11,7 +11,7 @@ uniform vec2 screenDim;
 //  - band widths
 //  - band radius
 //  - band origin (L,C,R)
-uniform sampler2D ripples;
+uniform samplerBuffer ripples;
 
 //uniform vec4 sphereLpos;
 //uniform vec4 sphereCpos;
@@ -57,5 +57,7 @@ void main(void) {
     nRipplesAffecting = float(fequals(vs_distToSpheres[0], 100.0f, 4.0f)) * (1.0 - (100.0f / rippleAttenDist));
     out_Color = clamp(vs_Color + vec4(bandStrength * nRipplesAffecting), 0.0f, 1.0f);
 */
-    out_Color = texture(ripples, vec2(0.0f));
+    out_Color = texelFetch(ripples, 0);
+    //out_Color = vec4(0.0, 1.0, 0.0, 1.0);
+    //gl_FragColor = out_color;
 }

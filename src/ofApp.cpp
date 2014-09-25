@@ -1,6 +1,7 @@
 #include "ofApp.h"
 
 #include <iostream>
+#include "errors.h"
 
 //--------------------------------------------------------------
 void ofApp::setup() {
@@ -10,9 +11,9 @@ void ofApp::setup() {
     // set up the band attributes
     bandStrength = 0.5f;
     rippleAttenDist = 500.0f;
-    baseBandwidth = 10.0f;
-    //minBandwidth = 10.1f;
-    minBandwidth = 200.0f;
+    baseBandwidth = 5.0f;
+    baseBandradius = 10.0f;
+    minBandwidth = 0.2f;
     rippleSpeed = 0.0f;
 
     // make sure we're using the image as a texture
@@ -39,9 +40,6 @@ void ofApp::setup() {
     ofEnableDepthTest();
     //std::cout << light.getPosition() << std::endl;
     player.play();
-
-    // generate the texture we'll be using
-    glGenTextures( 1, &rippleTexID);
 }
 
 //--------------------------------------------------------------
@@ -76,7 +74,7 @@ void ofApp::update() {
     rband *= baseBandwidth;
 
     Ripple tmp;
-    tmp.radius = 1.0f; // this is in world coordinates
+    tmp.radius = baseBandradius; // this is in world coordinates
 
     // add any new bands
     if (lband > minBandwidth) {
@@ -128,20 +126,10 @@ void ofApp::ripplesToTexture() {
         return;
     }
 
-    // make vector of pixels
-    //ofPixels rippleTex;
-
-    //rippleTex.allocate(ripples.size(), 1, OF_PIXELS_RGBA);
-
-    //std::list<Ripple>::iterator itr = ripples.begin();
-    //for (unsigned int idx = 0; itr != ripples.end() && idx < ripples.size(); ++itr, ++idx) {
-    //    rippleTex.setColor((int)idx, 0, ofColor(itr->width, itr->radius, itr->origin));
-    //}
     std::vector<Ripple> rippleData;
-    Ripple tmp = {255.0, 0.0, 0.0, 1.0};
+    Ripple tmp = {1.0, 0.0, 0.0, 1.0};
     for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
-        //rippleData.push_back(*itr);
-        rippleData.push_back(tmp);
+        rippleData.push_back(*itr);
     }
 
     // make the ripple buffer
@@ -149,30 +137,28 @@ void ofApp::ripplesToTexture() {
     // bind to GL_TEXTURE_BUFFER
     glBindBuffer(GL_TEXTURE_BUFFER, rippleTexBuffer);
     // specify buffer data
-    glBufferData(GL_TEXTURE_BUFFER, sizeof(float) * 4 * rippleData.size(), &rippleData[0], GL_STATIC_DRAW);
+    unsigned int bufferSize = sizeof(Ripple) * rippleData.size();
+    //unsigned int bufferSize = sizeof(tmp);
+    glBufferData(GL_TEXTURE_BUFFER, bufferSize, NULL, GL_STATIC_DRAW);
+    //glBufferSubData(GL_TEXTURE_BUFFER, 0, bufferSize, &rippleData[0]);
+    glBufferSubData(GL_TEXTURE_BUFFER, 0, bufferSize, &rippleData[0]);
+
+    // generate the texture we'll be using
+    glGenTextures( 1, &rippleTexID);
 
     // bind the rippleTexture
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_BUFFER, rippleTexID );
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, rippleTexBuffer);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
-    //glTexImage2D(GL_TEXTURE_BUFFER, 0, GL_RGB, ripples.size(), 1 /*height*/, 0, GL_RGB, GL_FLOAT, &rippleData[0]);
 
-    // update the image
-    //rippleImg.setFromPixels(rippleTex);
-    //rippleImg.update();
+    // set the data to our buffer
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, rippleTexBuffer);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    // convert the ripples to a texture to draw them
-    ripplesToTexture();
-
     camera.begin();
 
     shader.begin();
-
-    ////light.enable();
 
     // set the shader uniforms for the sphere positions
     shader.setUniform4f("sphereLpos", sphereL.getX(), sphereL.getY(), sphereL.getZ(), 1.0f);
@@ -188,11 +174,18 @@ void ofApp::draw() {
 
     if (ripples.size() > 0) {
         //shader.setUniformTexture("ripples", rippleImg.getTextureReference(), 0);
-        shader.setUniformTexture("ripples", GL_TEXTURE_2D, rippleTexID, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_BUFFER, rippleTexID);
+        shader.setUniform1i("ripples", GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0);
+        checkGLError("setting up the texture", __FILE__, __LINE__);
+
+        // convert the ripples to a texture to draw them
+        ripplesToTexture();
     }
 
-    shader.printActiveAttributes();
-    shader.printActiveUniforms();
+    //shader.printActiveAttributes();
+    //shader.printActiveUniforms();
 
     room.draw();
 
@@ -204,10 +197,6 @@ void ofApp::draw() {
     //light.disable();
 
     shader.end();
-
-    ofTexture tmpTex;
-    tmpTex.setUseExternalTextureID(rippleTexID);
-    tmpTex.draw(0, 0, ofGetWidth(), ofGetHeight());
 
     camera.end();
 }

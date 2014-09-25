@@ -41,11 +41,12 @@ class ofApp : public ofBaseApp {
 
         ofShader shader;
         ofCamera camera;
-        ofLight light;
+        //ofLight light;
 
         float bandStrength; // base strength for each band
         float rippleAttenDist; // distance at which the band fades out
         float baseBandwidth; // base band width
+        float baseBandradius; // base band width
         float minBandwidth; // the minimum width that we draw
         float rippleSpeed; // how fast the ripples expand outward
         std::list<Ripple> ripples;
