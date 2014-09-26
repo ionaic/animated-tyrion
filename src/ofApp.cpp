@@ -9,15 +9,16 @@ void ofApp::setup() {
     //ofSetFrameRate(60); // causes segfault on exit
 
     // set up the band attributes
-    bandStrength = 0.5f;
+    bandStrength = 0.1f;
     rippleAttenDist = 500.0f;
-    baseBandwidth = 5.0f;
+    baseBandwidth = 10.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 0.2f;
-    rippleSpeed = 11.0f;
+    minBandwidth = 3.0f;
+    rippleSpeed = 50.0f;
 
     // set up the sound player, load the song file from the data folder
     player.loadSound("sounds/settledown.mp3");
+    //player.loadSound("sounds/daystocome.mp3");
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -102,10 +103,11 @@ void ofApp::update() {
 
     // check if there are ripples to update/cull
     if (ripples.size() > 0) {
+        float timedSpeed = rippleSpeed * ofGetLastFrameTime();
         // iterate backwards over the vector, erasing the out-of-range ripples
         for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
             // update the ripple
-            itr->radius += rippleSpeed;
+            itr->radius += timedSpeed;
 
             // if this ripple is outside the attenuation distance
             if (itr->radius > rippleAttenDist) {
@@ -115,7 +117,7 @@ void ofApp::update() {
         }
     }
 
-    printRipples();
+    //printRipples();
 }
 
 void ofApp::printRipples() {
@@ -178,10 +180,13 @@ void ofApp::draw() {
     shader.setUniform4f("sphereLpos", sphereL.getX(), sphereL.getY(), sphereL.getZ(), 1.0f);
     shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
     shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
+    //std::cout << sphereL.getX() << " " << sphereL.getY() << " " << sphereL.getZ() << " " << std::endl;
 
     // set the uniform for the band strength and attenuation
     shader.setUniform1f("bandStrength", bandStrength);
     shader.setUniform1f("rippleAttenDist", rippleAttenDist);
+
+    shader.setUniform1i("nRipples",  ripples.size());
     
     // set the number of ripples
     // arguments are: sampler name, image, texcoord location
