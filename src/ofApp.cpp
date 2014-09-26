@@ -13,8 +13,9 @@ void ofApp::setup() {
     rippleAttenDist = 500.0f;
     baseBandwidth = 10.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 3.0f;
-    rippleSpeed = 50.0f;
+    minBandwidth = 2.0f;
+    rippleSpeed = 100.0f;
+    maxNRipples = 100;
 
     // set up the sound player, load the song file from the data folder
     player.loadSound("sounds/settledown.mp3");
@@ -87,18 +88,27 @@ void ofApp::update() {
         tmp.origin = 0.0f;
 
         ripples.push_back(tmp);
+        if (ripples.size() >= maxNRipples) {
+            ripples.pop_front();
+        }
     }
     if (cband > minBandwidth) {
         tmp.width = cband;
         tmp.origin = 1.0f;
 
         ripples.push_back(tmp);
+        if (ripples.size() >= maxNRipples) {
+            ripples.pop_front();
+        }
     }
     if (rband > minBandwidth) {
         tmp.width = rband;
         tmp.origin = 2.0f;
 
         ripples.push_back(tmp);
+        if (ripples.size() >= maxNRipples) {
+            ripples.pop_front();
+        }
     }
 
     // check if there are ripples to update/cull

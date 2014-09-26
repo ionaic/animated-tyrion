@@ -51,6 +51,7 @@ class ofApp : public ofBaseApp {
         float baseBandradius; // base band width
         float minBandwidth; // the minimum width that we draw
         float rippleSpeed; // how fast the ripples expand outward
+        unsigned int maxNRipples; // maximum number of ripples
         std::list<Ripple> ripples;
 
         GLuint rippleTexID;
