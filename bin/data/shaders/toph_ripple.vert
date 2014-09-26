@@ -22,15 +22,8 @@ void main(void) {
     // pass the position through modified by the transforms
     gl_Position = modelViewProjectionMatrix * position;
 
-    vs_WorldPos = position;
-
-    // calculate the distance from the spheres
-    //vec4 diffL = modelMatrix * sphereLpos - vs_WorldPos;
-    //vec4 diffC = modelMatrix * sphereCpos - vs_WorldPos;
-    //vec4 diffR = modelMatrix * sphereRpos - vs_WorldPos;
-    //vs_distToSpheres = vec3(length(diffL.xyz), 
-    //                        length(diffC.xyz),
-    //                        length(diffR.xyz));
+    // output the position to the fragment shader
+    vs_WorldPos = modelViewProjectionMatrix * position;
 
     // output color to frag
     vs_Color = color;

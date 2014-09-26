@@ -8,6 +8,7 @@ uniform float rippleAttenDist; // distance at which a band fades out
 uniform vec2 screenDim;
 
 uniform mat4 modelMatrix;
+uniform mat4 modelViewProjectionMatrix;
 uniform vec4 sphereLpos;
 uniform vec4 sphereCpos;
 uniform vec4 sphereRpos;
