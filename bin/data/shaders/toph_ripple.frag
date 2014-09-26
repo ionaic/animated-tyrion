@@ -8,6 +8,7 @@ uniform float rippleAttenDist; // distance at which a band fades out
 uniform vec2 screenDim;
 
 uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
 uniform mat4 modelViewProjectionMatrix;
 uniform vec4 sphereLpos;
 uniform vec4 sphereCpos;
@@ -21,7 +22,6 @@ uniform samplerBuffer ripples;
 
 in vec4 vs_Color;
 in vec4 vs_WorldPos;
-//in vec3 vs_distToSpheres;
 out vec4 out_Color;
 
 bool fequals(float a, float b) {
@@ -38,9 +38,9 @@ void main(void) {
 
     vec4 lightMod = vec4(0.0, 0.0, 0.0, 1.0);
 
-    vec4 diffL = modelMatrix * sphereLpos - vs_WorldPos;
-    vec4 diffC = modelMatrix * sphereCpos - vs_WorldPos;
-    vec4 diffR = modelMatrix * sphereRpos - vs_WorldPos;
+    vec4 diffL = modelMatrix * viewMatrix * sphereLpos - vs_WorldPos;
+    vec4 diffC = modelMatrix * viewMatrix * sphereCpos - vs_WorldPos;
+    vec4 diffR = modelMatrix * viewMatrix * sphereRpos - vs_WorldPos;
     vec3 vs_distToSpheres = vec3(   length(diffL.xyz), 
                                     length(diffC.xyz),
                                     length(diffR.xyz));
@@ -59,14 +59,18 @@ void main(void) {
         // current radius, then this ripple is affecting this fragment
         //
         // this is modified by the attenuation
+        // for just white light
         //nRipplesAffecting += float(fequals(vs_distToSpheres[sphereIdx], rippleLookup.y, rippleLookup.x)) * rippleAtten;
 
+        // for colored lights
         lightMod[sphereIdx] += float(fequals(vs_distToSpheres[sphereIdx], rippleLookup.y, rippleLookup.x)) * rippleAtten;
     }
 
     // find the color modification for this spot and add it to the color, this
     // is a flat increase in lightness (adding white light)
+    // for just white light
     //out_Color = vs_Color + vec4(bandStrength * nRipplesAffecting);
+    // for tri lights
     out_Color = vs_Color + lightMod * bandStrength;
     out_Color.a = 1.0f;
 }
