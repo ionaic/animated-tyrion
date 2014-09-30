@@ -1,0 +1,7 @@
+*.ogv
+videos/*
+bin/data/sounds/*
+*~
+ofiles/*
+*.o
+*.a
