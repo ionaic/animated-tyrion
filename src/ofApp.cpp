@@ -10,9 +10,10 @@ void ofApp::setup() {
 
     // set up the band attributes
     bandStrength = 0.1f;
+    //rippleAttenDist = 350.0f;
     rippleAttenDist = 500.0f;
     baseBandwidth = 10.0f;
-    baseBandradius = 10.0f;
+    baseBandradius = 300.0f;
     minBandwidth = 2.0f;
     rippleSpeed = 100.0f;
     maxNRipples = 100;
@@ -188,6 +189,7 @@ void ofApp::draw() {
 
     // set the shader uniforms for the sphere positions
     shader.setUniform4f("sphereLpos", sphereL.getX(), sphereL.getY(), sphereL.getZ(), 1.0f);
+    checkGLError("set spherel uniform", __FILE__, __LINE__);
     shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
     shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
     //std::cout << sphereL.getX() << " " << sphereL.getY() << " " << sphereL.getZ() << " " << std::endl;
