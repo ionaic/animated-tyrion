@@ -63,11 +63,11 @@ void main(void) {
         vec3 rippleLookup = texelFetch(ripples, i).xyz;
 
         // get the origin index
-        //int sphereIdx = int(rippleLookup.z);
-        int sphereIdx = 0;
+        int sphereIdx = int(rippleLookup.z);
+        //int sphereIdx = 0;
 
-        //float rippleAtten = 1.0 - (rippleLookup.y / rippleAttenDist);
-        float rippleAtten = 1.0;
+        float rippleAtten = 1.0 - (rippleLookup.y / rippleAttenDist);
+        //float rippleAtten = 1.0;
 
         // if the distance from the appropriate sphere is the same as the
         // current radius, then this ripple is affecting this fragment
@@ -84,7 +84,7 @@ void main(void) {
     // is a flat increase in lightness (adding white light)
     // for just white light
     out_Color = vs_Color + vec4(bandStrength * nRipplesAffecting);
-    out_Color = vec4(sphereLpos == vec4(412, 307.2, 0.0, 1.0));
+    //out_Color = vec4(sphereLpos == vec4(412, 307.2, 0.0, 1.0));
     // for tri lights
     //out_Color = vs_Color + lightMod * bandStrength;
     //out_Color = vec4(vs_distToSpheres / 1500, 1.0);

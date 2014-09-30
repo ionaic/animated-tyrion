@@ -13,7 +13,7 @@ void ofApp::setup() {
     //rippleAttenDist = 350.0f;
     rippleAttenDist = 500.0f;
     baseBandwidth = 10.0f;
-    baseBandradius = 300.0f;
+    baseBandradius = 200.0f;
     minBandwidth = 2.0f;
     rippleSpeed = 100.0f;
     maxNRipples = 100;
@@ -148,7 +148,6 @@ void ofApp::ripplesToTexture() {
     }
 
     std::vector<Ripple> rippleData;
-    Ripple tmp = {1.0, 0.0, 0.0, 1.0};
     for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
         rippleData.push_back(*itr);
     }
@@ -158,12 +157,9 @@ void ofApp::ripplesToTexture() {
     checkGLError("bind rippleTexBuffer", __FILE__, __LINE__);
     // specify buffer data
     unsigned int bufferSize = sizeof(Ripple) * rippleData.size();
-    //unsigned int bufferSize = sizeof(Ripple);
-    //unsigned int bufferSize = sizeof(tmp);
     glBufferData(GL_TEXTURE_BUFFER, bufferSize, NULL, GL_STATIC_DRAW);
     checkGLError("set buffer data rippleTexBuffer", __FILE__, __LINE__);
     glBufferSubData(GL_TEXTURE_BUFFER, 0, bufferSize, &rippleData[0]);
-    //glBufferSubData(GL_TEXTURE_BUFFER, 0, bufferSize, &tmp);
     checkGLError("set buffer sub data rippleTexBuffer", __FILE__, __LINE__);
 
     // bind the rippleTexture
