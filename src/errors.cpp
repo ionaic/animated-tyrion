@@ -31,7 +31,4 @@ void checkGLError(const char *msg, const char *fname, const int line) {
         }
         std::cerr << " " << err << " " << gluErrorString(err) << std::endl;
     }
-    //else {
-    //    std::cerr << std::string(fname) << ":" << line << " " << std::string(msg) << std::endl << "    GL NO ERROR " << std::endl;
-    //}
 }

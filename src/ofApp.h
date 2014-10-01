@@ -41,10 +41,13 @@ class ofApp : public ofBaseApp {
         ofBoxPrimitive room;
 		ofSpherePrimitive sphereL, sphereC, sphereR;
 
-        ofShader shader;
-        ofCamera camera;
-        //ofLight light;
+        float boxRotationSpeed;
 
+        // graphics objects
+        ofCamera camera;
+
+        // shader variables
+        ofShader shader;
         float bandStrength; // base strength for each band
         float rippleAttenDist; // distance at which the band fades out
         float baseBandwidth; // base band width

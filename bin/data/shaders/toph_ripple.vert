@@ -6,8 +6,6 @@ in vec4 color;
 in vec2 texcoord;
 
 // MVP matrix
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
 uniform mat4 modelViewProjectionMatrix;
 
 // output variables (to fragment shader)

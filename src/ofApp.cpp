@@ -9,14 +9,16 @@ void ofApp::setup() {
     //ofSetFrameRate(60); // causes segfault on exit
 
     // set up the band attributes
-    bandStrength = 0.1f;
-    //rippleAttenDist = 350.0f;
-    rippleAttenDist = 500.0f;
+    bandStrength = 0.3f;
+    rippleAttenDist = 350.0f;
+    //rippleAttenDist = 500.0f;
     baseBandwidth = 10.0f;
     baseBandradius = 200.0f;
-    minBandwidth = 2.0f;
-    rippleSpeed = 100.0f;
+    minBandwidth = 1.0f;
+    rippleSpeed = 50.0f;
     maxNRipples = 100;
+
+    boxRotationSpeed = 0.0;
 
     // set up the sound player, load the song file from the data folder
     player.loadSound("sounds/settledown.mp3");
@@ -46,10 +48,7 @@ void ofApp::setup() {
     // make the ripple buffer
     glGenBuffers(1, &rippleTexBuffer);
     checkGLError("generate rippleTexBuffer", __FILE__, __LINE__);
-}
 
-//--------------------------------------------------------------
-void ofApp::update() {
     float centerX = ofGetWidth() / 2, 
           centerY = ofGetHeight() / 2,
           thirdY = ofGetHeight() * 0.40;
@@ -60,13 +59,20 @@ void ofApp::update() {
     room.setPosition(centerX, centerY, 0);
     
     camera.setPosition(centerX, centerY, 200);
-    camera.rotate(90, 0, 0, 1);
+}
+
+//--------------------------------------------------------------
+void ofApp::update() {
+    // rotate the room slowly
+    room.pan(boxRotationSpeed);
+    
+    // always look at the middle sphere
     camera.lookAt(sphereC.getPosition());
 
     // get 3 bands to determine band sizes for the 3 
     float *bands = ofSoundGetSpectrum(10);
-    float lband = bands[0],
-          cband = bands[1],
+    float lband = bands[1],
+          cband = bands[0],
           rband = bands[2];
     for (unsigned int i = 3; i < 10; ++i) {
         rband += bands[i];
@@ -213,10 +219,14 @@ void ofApp::draw() {
         checkGLError("done setting up the texture", __FILE__, __LINE__);
     }
 
+    shader.setUniformMatrix4f("modelMatrix", room.getLocalTransformMatrix());
     room.draw();
 
+    shader.setUniformMatrix4f("modelMatrix", sphereL.getLocalTransformMatrix());
     sphereL.draw();
+    shader.setUniformMatrix4f("modelMatrix", sphereC.getLocalTransformMatrix());
     sphereC.draw();
+    shader.setUniformMatrix4f("modelMatrix", sphereR.getLocalTransformMatrix());
     sphereR.draw();
 
     shader.end();
