@@ -27,7 +27,7 @@ void ofApp::setup() {
     curTrack = tracklist.begin();
 
     // set up the sound player, load the song file from the data folder
-    player.loadSound(*curTrack);
+    player.loadSound(tracklist[0]);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -74,17 +74,17 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     // move on to the next track if we're done playing this one
-    if (!player.getIsPlaying()) {
-        ++curTrack;
-        if (curTrack != tracklist.end()) {
-            player.unloadSound();
-            ofSoundUpdate();
-            player.loadSound(*curTrack);
-            ofSoundUpdate();
-            player.play();
-            ofSoundUpdate();
-        }
-    }
+    //if (!player.getIsPlaying()) {
+    //    ++curTrack;
+    //    if (curTrack != tracklist.end()) {
+    //        player.unloadSound();
+    //        ofSoundUpdate();
+    //        player.loadSound(*curTrack);
+    //        ofSoundUpdate();
+    //        player.play();
+    //        ofSoundUpdate();
+    //    }
+    //}
 
     // rotate the room slowly
     room.pan(boxRotationSpeed);
