@@ -36,6 +36,8 @@ class ofApp : public ofBaseApp {
 
         // audio player
         ofSoundPlayer player;
+        std::vector<std::string> tracklist;
+        std::vector<std::string>::iterator curTrack;
 
         // primitives for the scene
         ofBoxPrimitive room;

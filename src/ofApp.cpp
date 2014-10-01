@@ -9,20 +9,25 @@ void ofApp::setup() {
     //ofSetFrameRate(60); // causes segfault on exit
 
     // set up the band attributes
-    bandStrength = 0.3f;
+    bandStrength = 0.2f;
     rippleAttenDist = 350.0f;
-    //rippleAttenDist = 500.0f;
-    baseBandwidth = 10.0f;
-    baseBandradius = 200.0f;
+    baseBandwidth = 8.0f;
+    baseBandradius = 10.0f;
     minBandwidth = 1.0f;
-    rippleSpeed = 50.0f;
-    maxNRipples = 100;
+    rippleSpeed = 100.0f;
+    maxNRipples = 200;
 
     boxRotationSpeed = 0.0;
 
+
+    tracklist.push_back("sounds/settledown.mp3");
+    tracklist.push_back("sounds/daystocome.mp3");
+    tracklist.push_back("sounds/razorsharp.mp3");
+
+    curTrack = tracklist.begin();
+
     // set up the sound player, load the song file from the data folder
-    player.loadSound("sounds/settledown.mp3");
-    //player.loadSound("sounds/daystocome.mp3");
+    player.loadSound(*curTrack);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -56,18 +61,33 @@ void ofApp::setup() {
     sphereC.setPosition(centerX,        thirdY, 0);
     sphereR.setPosition(centerX + 100,  thirdY, 0);
 
+    // set the room position to make a more interesting scene
     room.setPosition(centerX, centerY, 0);
     
+    // set the camera position
     camera.setPosition(centerX, centerY, 200);
+    
+    // always look at the middle sphere
+    camera.lookAt(sphereC.getPosition());
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+    // move on to the next track if we're done playing this one
+    if (!player.getIsPlaying()) {
+        ++curTrack;
+        if (curTrack != tracklist.end()) {
+            player.unloadSound();
+            ofSoundUpdate();
+            player.loadSound(*curTrack);
+            ofSoundUpdate();
+            player.play();
+            ofSoundUpdate();
+        }
+    }
+
     // rotate the room slowly
     room.pan(boxRotationSpeed);
-    
-    // always look at the middle sphere
-    camera.lookAt(sphereC.getPosition());
 
     // get 3 bands to determine band sizes for the 3 
     float *bands = ofSoundGetSpectrum(10);
@@ -194,7 +214,6 @@ void ofApp::draw() {
     checkGLError("set spherel uniform", __FILE__, __LINE__);
     shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
     shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
-    //std::cout << sphereL.getX() << " " << sphereL.getY() << " " << sphereL.getZ() << " " << std::endl;
 
     // set the uniform for the band strength and attenuation
     shader.setUniform1f("bandStrength", bandStrength);
@@ -205,20 +224,15 @@ void ofApp::draw() {
     // set the number of ripples
     // arguments are: sampler name, image, texcoord location
     if (ripples.size() > 0) {
-        //shader.setUniformTexture("ripples", rippleImg.getTextureReference(), 0);
         glActiveTexture(GL_TEXTURE0);
         checkGLError("set active texture", __FILE__, __LINE__);
         glBindTexture(GL_TEXTURE_BUFFER, rippleTexID);
         checkGLError("bind texture", __FILE__, __LINE__);
-        //shader.setUniform1i("ripples", GL_TEXTURE0);
-        //GLint loc = glGetUniformLocation(shader.getProgram(), "ripples");
-        //checkGLError("get shader uniform location", __FILE__, __LINE__);
-        //glUniform1i(loc, 0);
-        //checkGLError("set shader uniform for texture", __FILE__, __LINE__);
         glActiveTexture(GL_TEXTURE0);
         checkGLError("done setting up the texture", __FILE__, __LINE__);
     }
 
+    // must keep updating the model matrix
     shader.setUniformMatrix4f("modelMatrix", room.getLocalTransformMatrix());
     room.draw();
 
