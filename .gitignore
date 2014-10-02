@@ -5,3 +5,7 @@ bin/data/sounds/*
 ofiles/*
 *.o
 *.a
+Makefile
+*.make
+*.layout
+*.cbp
