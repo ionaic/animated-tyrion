@@ -13,7 +13,7 @@ void ofApp::setup() {
     rippleAttenDist = 350.0f;
     baseBandwidth = 15.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 3.0f;
+    minBandwidth = 2.0f;
     rippleSpeed = 100.0f;
     maxNRipples = 200;
 
@@ -29,7 +29,7 @@ void ofApp::setup() {
     curTrack = tracklist.begin();
 
     // set up the sound player, load the song file from the data folder
-    player.loadSound(tracklist[3]);
+    player.loadSound(tracklist[0]);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
