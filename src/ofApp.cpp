@@ -7,6 +7,7 @@
 void ofApp::setup() {
     //ofSetVerticalSync(true); // might be causing a hang on exit?
     //ofSetFrameRate(60); // causes segfault on exit
+    ofSetFullscreen(true);
 
     // set up the band attributes
     bandStrength = 0.5f;
@@ -87,6 +88,9 @@ void ofApp::update() {
 //            ofSoundUpdate();
             player.play();
 //            ofSoundUpdate();
+        }
+        else {
+            this->exit();
         }
     }
 
@@ -305,7 +309,10 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 void ofApp::exit(ofEventArgs &args) {
     // attempting to clean up at the end, something in the sound player is
     // dying on exit and isn't cleaned up
+    this->exit();
+}
 
+void ofApp::exit() {
     std::cout << "exiting" << std::endl;
     ofSoundStopAll();
     ofSoundShutdown();
