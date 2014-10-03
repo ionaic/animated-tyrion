@@ -11,9 +11,9 @@ void ofApp::setup() {
     // set up the band attributes
     bandStrength = 0.5f;
     rippleAttenDist = 350.0f;
-    baseBandwidth = 8.0f;
+    baseBandwidth = 15.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 1.0f;
+    minBandwidth = 3.0f;
     rippleSpeed = 100.0f;
     maxNRipples = 200;
 
