@@ -9,7 +9,7 @@ void ofApp::setup() {
     //ofSetFrameRate(60); // causes segfault on exit
 
     // set up the band attributes
-    bandStrength = 0.2f;
+    bandStrength = 0.5f;
     rippleAttenDist = 350.0f;
     baseBandwidth = 8.0f;
     baseBandradius = 10.0f;
@@ -99,9 +99,9 @@ void ofApp::update() {
     for (unsigned int i = 3; i < 10; ++i) {
         rband += bands[i];
     }
-    //sphereL.setRadius(10 * lband + 10);
-    //sphereC.setRadius(10 * cband + 10);
-    //sphereR.setRadius(10 * rband + 10);
+    sphereL.setRadius(10 * lband + 10);
+    sphereC.setRadius(10 * cband + 10);
+    sphereR.setRadius(10 * rband + 10);
 
     lband *= baseBandwidth;
     cband *= baseBandwidth;
@@ -219,7 +219,7 @@ void ofApp::draw() {
     shader.setUniform3f("sphereRadii", sphereL.getRadius(), sphereC.getRadius(), sphereR.getRadius());
 
     // set the uniform describing the first timestep of each band
-    shader.setUniform1f("rippleInitRadius", baseBandradius + rippleSpeed);
+    shader.setUniform1f("rippleInitRadius", baseBandradius);
 
     // set the uniform for the band strength and attenuation
     shader.setUniform1f("bandStrength", bandStrength);

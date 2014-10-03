@@ -31,7 +31,7 @@ bool fequals(float a, float b, float epsilon) {
 }
 
 bvec3 IsOnSphere(vec3 dist) {
-    return bvec3(dist == sphereRadii);
+    return bvec3(equal(dist, sphereRadii) || lessThan(dist, vec3(30.0f)));
 }
 
 void main(void) {
@@ -75,7 +75,7 @@ void main(void) {
 
         // to make the spheres blink
         // if there is a new ripple, i.e. its radius is at or below the initial radius (start radius + 1 * dt * ripple_velocity, add 1 timestep of the speed)
-        newRipples[sphereIdx] += float(rippleLookup.y <= rippleInitRadius) * rippleAtten;
+        newRipples[sphereIdx] += float(rippleLookup.y <= rippleInitRadius);
     }
 
     // find the color modification for this spot and add it to the color, this
@@ -84,7 +84,10 @@ void main(void) {
     //out_Color = vs_Color + vec4(bandStrength * nRipplesAffecting);
 
     // for tri lights
-    out_Color = vs_Color + lightMod.brga * bandStrength + vec4(newRipples.brg, 1.0f) * bandStrength * vec4(IsOnSphere(vs_distToSpheres), 1.0f);
+    vec3 onSpheres = vec3(IsOnSphere(vs_distToSpheres));
+    float isSphereBottom = dot(vec4(0.0, -1.0, 0.0, 0.0), (vs_WorldPos - sphereLpos * onSpheres.x - sphereCpos * onSpheres.y - sphereRpos * onSpheres.z));
+    // lol readability
+    out_Color = vs_Color + lightMod.brga * bandStrength + vec4(newRipples * (isSphereBottom * float(isSphereBottom > 0.0) * 0.5) * bandStrength * onSpheres, 1.0f).brga;
 
     // ensure that everything is opaque
     out_Color.a = 1.0f;

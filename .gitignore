@@ -9,3 +9,5 @@ Makefile
 *.make
 *.layout
 *.cbp
+*.depend
+*.workspace
