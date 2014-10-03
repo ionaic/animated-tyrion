@@ -13,9 +13,9 @@ void ofApp::setup() {
     rippleAttenDist = 350.0f;
     baseBandwidth = 15.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 3.0f;
+    minBandwidth = 10.0f;
     rippleSpeed = 100.0f;
-    maxNRipples = 200;
+    maxNRipples = 100;
 
     // this makes everything awful looking, but i left it just in case
     //boxRotationSpeed = 0.0;
@@ -126,9 +126,19 @@ void ofApp::update() {
             }
         }
     }
-
+    float percentMax = (float)ripples.size() / (float)maxNRipples;
+    float modifiedBandwidth = minBandwidth * percentMax;
     // add any new bands
-    if (lband > minBandwidth) {
+    if (rband > modifiedBandwidth) {
+        tmp.width = rband;
+        tmp.origin = 2.0f;
+
+        ripples.push_back(tmp);
+        if (ripples.size() >= maxNRipples) {
+            ripples.pop_front();
+        }
+    }
+    if (lband > modifiedBandwidth) {
         tmp.width = lband;
         tmp.origin = 0.0f;
 
@@ -137,18 +147,9 @@ void ofApp::update() {
             ripples.pop_front();
         }
     }
-    if (cband > minBandwidth) {
+    if (cband > modifiedBandwidth) {
         tmp.width = cband;
         tmp.origin = 1.0f;
-
-        ripples.push_back(tmp);
-        if (ripples.size() >= maxNRipples) {
-            ripples.pop_front();
-        }
-    }
-    if (rband > minBandwidth) {
-        tmp.width = rband;
-        tmp.origin = 2.0f;
 
         ripples.push_back(tmp);
         if (ripples.size() >= maxNRipples) {
