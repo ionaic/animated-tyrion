@@ -12,8 +12,8 @@ void ofApp::setup() {
     bandStrength = 0.5f;
     rippleAttenDist = 350.0f;
     baseBandwidth = 15.0f;
-    baseBandradius = 10.0f;
-    minBandwidth = 2.0f;
+    baseBandradius = 90.0f;
+    minBandwidth = 1.0f;
     rippleSpeed = 100.0f;
     maxNRipples = 200;
 
@@ -27,9 +27,10 @@ void ofApp::setup() {
     tracklist.push_back("sounds/yohoho.mp3");
 
     curTrack = tracklist.begin();
+    curTrack++;
 
     // set up the sound player, load the song file from the data folder
-    player.loadSound(tracklist[0]);
+    player.loadSound(*curTrack);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -71,22 +72,23 @@ void ofApp::setup() {
 
     // always look at the middle sphere
     camera.lookAt(sphereC.getPosition());
+    camera.tilt(10);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     // move on to the next track if we're done playing this one
-    //if (!player.getIsPlaying()) {
-    //    ++curTrack;
-    //    if (curTrack != tracklist.end()) {
-    //        player.unloadSound();
-    //        ofSoundUpdate();
-    //        player.loadSound(*curTrack);
-    //        ofSoundUpdate();
-    //        player.play();
-    //        ofSoundUpdate();
-    //    }
-    //}
+    if (!player.getIsPlaying()) {
+        ++curTrack;
+        if (curTrack != tracklist.end()) {
+            player.unloadSound();
+//            ofSoundUpdate();
+            player.loadSound(*curTrack);
+//            ofSoundUpdate();
+            player.play();
+//            ofSoundUpdate();
+        }
+    }
 
     // rotate the room slowly (lol nope, do not. see boxRotationSpeed init in setup)
     //room.pan(boxRotationSpeed);
