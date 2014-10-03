@@ -11,11 +11,11 @@ void ofApp::setup() {
     // set up the band attributes
     bandStrength = 0.5f;
     rippleAttenDist = 350.0f;
-    baseBandwidth = 1.0f;
+    baseBandwidth = 8.0f;
     baseBandradius = 10.0f;
-    minBandwidth = 5.0f;
+    minBandwidth = 1.0f;
     rippleSpeed = 100.0f;
-    maxNRipples = 150;
+    maxNRipples = 200;
 
     // this makes everything awful looking, but i left it just in case
     //boxRotationSpeed = 0.0;
@@ -29,7 +29,7 @@ void ofApp::setup() {
     curTrack = tracklist.begin();
 
     // set up the sound player, load the song file from the data folder
-    player.loadSound(tracklist[1]);
+    player.loadSound(tracklist[3]);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -38,8 +38,6 @@ void ofApp::setup() {
     sphereL.setRadius(10);
     sphereC.setRadius(10);
     sphereR.setRadius(10);
-
-    lband = cband = rband = 0.0f;
 
     // set up the room at a good size and rotate it for a more interesting
     // scene
@@ -78,36 +76,36 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 void ofApp::update() {
     // move on to the next track if we're done playing this one
-    if (!player.getIsPlaying()) {
-        ++curTrack;
-        if (curTrack != tracklist.end()) {
-            player.unloadSound();
-            ofSoundUpdate();
-            player.loadSound(*curTrack);
-            ofSoundUpdate();
-            player.play();
-            ofSoundUpdate();
-        }
-    }
+    //if (!player.getIsPlaying()) {
+    //    ++curTrack;
+    //    if (curTrack != tracklist.end()) {
+    //        player.unloadSound();
+    //        ofSoundUpdate();
+    //        player.loadSound(*curTrack);
+    //        ofSoundUpdate();
+    //        player.play();
+    //        ofSoundUpdate();
+    //    }
+    //}
 
     // rotate the room slowly (lol nope, do not. see boxRotationSpeed init in setup)
     //room.pan(boxRotationSpeed);
 
     // get 3 bands to determine band sizes for the 3
     float *bands = ofSoundGetSpectrum(10);
-    float tmpLband = bands[1],
-          tmpCband = bands[0],
-          tmpRband = bands[2];
+    float lband = bands[1],
+          cband = bands[0],
+          rband = bands[2];
     for (unsigned int i = 3; i < 10; ++i) {
         rband += bands[i];
     }
-    sphereL.setRadius(10 * tmpLband + 10);
-    sphereC.setRadius(10 * tmpCband + 10);
-    sphereR.setRadius(10 * tmpRband + 10);
+    sphereL.setRadius(10 * lband + 10);
+    sphereC.setRadius(10 * cband + 10);
+    sphereR.setRadius(10 * rband + 10);
 
-    lband += tmpLband * baseBandwidth;
-    cband += tmpCband * baseBandwidth;
-    rband += tmpRband * baseBandwidth;
+    lband *= baseBandwidth;
+    cband *= baseBandwidth;
+    rband *= baseBandwidth;
 
     Ripple tmp;
     tmp.radius = baseBandradius; // this is in world coordinates
@@ -130,7 +128,6 @@ void ofApp::update() {
     }
 
     // add any new bands
-    // TODO: maybe want to batch the band additions, 1 per s or similar, batch until over the threshold?
     if (lband > minBandwidth) {
         tmp.width = lband;
         tmp.origin = 0.0f;
@@ -139,8 +136,6 @@ void ofApp::update() {
         if (ripples.size() >= maxNRipples) {
             ripples.pop_front();
         }
-
-        lband = 0.0f;
     }
     if (cband > minBandwidth) {
         tmp.width = cband;
@@ -150,8 +145,6 @@ void ofApp::update() {
         if (ripples.size() >= maxNRipples) {
             ripples.pop_front();
         }
-
-        rband = 0.0f;
     }
     if (rband > minBandwidth) {
         tmp.width = rband;
@@ -161,8 +154,6 @@ void ofApp::update() {
         if (ripples.size() >= maxNRipples) {
             ripples.pop_front();
         }
-
-        cband = 0.0f;
     }
 }
 
