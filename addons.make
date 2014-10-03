@@ -1,5 +1,0 @@
-ofxOpenCv
-ofxGui
-ofxAssimpModelLoader
-ofx3DModelLoader
-ofxAnimatable

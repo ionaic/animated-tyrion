@@ -7,6 +7,8 @@ in vec2 texcoord;
 
 // MVP matrix
 uniform mat4 modelViewProjectionMatrix;
+// model matrix to transform coordinates into world space
+uniform mat4 modelMatrix;
 
 // output variables (to fragment shader)
 out vec4 vs_Color; // pass through vertex color
@@ -17,7 +19,7 @@ void main(void) {
     gl_Position = modelViewProjectionMatrix * position;
 
     // output the position to the fragment shader
-    vs_WorldPos = position;
+    vs_WorldPos = modelMatrix * position;
 
     // output color to frag
     vs_Color = color;

@@ -17,17 +17,19 @@ void ofApp::setup() {
     rippleSpeed = 100.0f;
     maxNRipples = 200;
 
-    boxRotationSpeed = 0.0;
+    // this makes everything awful looking, but i left it just in case
+    //boxRotationSpeed = 0.0;
 
 
     tracklist.push_back("sounds/settledown.mp3");
     tracklist.push_back("sounds/daystocome.mp3");
     tracklist.push_back("sounds/razorsharp.mp3");
+    tracklist.push_back("sounds/yohoho.mp3");
 
     curTrack = tracklist.begin();
 
     // set up the sound player, load the song file from the data folder
-    player.loadSound(tracklist[0]);
+    player.loadSound(tracklist[3]);
 
     // load the shader
     shader.load("shaders/toph_ripple.vert", "shaders/toph_ripple.frag");
@@ -54,7 +56,7 @@ void ofApp::setup() {
     glGenBuffers(1, &rippleTexBuffer);
     checkGLError("generate rippleTexBuffer", __FILE__, __LINE__);
 
-    float centerX = ofGetWidth() / 2, 
+    float centerX = ofGetWidth() / 2,
           centerY = ofGetHeight() / 2,
           thirdY = ofGetHeight() * 0.40;
     sphereL.setPosition(centerX - 100,  thirdY, 0);
@@ -63,10 +65,10 @@ void ofApp::setup() {
 
     // set the room position to make a more interesting scene
     room.setPosition(centerX, centerY, 0);
-    
+
     // set the camera position
     camera.setPosition(centerX, centerY, 200);
-    
+
     // always look at the middle sphere
     camera.lookAt(sphereC.getPosition());
 }
@@ -86,10 +88,10 @@ void ofApp::update() {
     //    }
     //}
 
-    // rotate the room slowly
-    room.pan(boxRotationSpeed);
+    // rotate the room slowly (lol nope, do not. see boxRotationSpeed init in setup)
+    //room.pan(boxRotationSpeed);
 
-    // get 3 bands to determine band sizes for the 3 
+    // get 3 bands to determine band sizes for the 3
     float *bands = ofSoundGetSpectrum(10);
     float lband = bands[1],
           cband = bands[0],
@@ -97,9 +99,9 @@ void ofApp::update() {
     for (unsigned int i = 3; i < 10; ++i) {
         rband += bands[i];
     }
-    sphereL.setRadius(10 * lband + 10);
-    sphereC.setRadius(10 * cband + 10);
-    sphereR.setRadius(10 * rband + 10);
+    //sphereL.setRadius(10 * lband + 10);
+    //sphereC.setRadius(10 * cband + 10);
+    //sphereR.setRadius(10 * rband + 10);
 
     lband *= baseBandwidth;
     cband *= baseBandwidth;
@@ -108,6 +110,22 @@ void ofApp::update() {
     Ripple tmp;
     tmp.radius = baseBandradius; // this is in world coordinates
     tmp.alphaPad = 1.0f;
+
+    // check if there are ripples to update/cull
+    if (ripples.size() > 0) {
+        float timedSpeed = rippleSpeed * ofGetLastFrameTime();
+        // iterate backwards over the vector, erasing the out-of-range ripples
+        for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
+            // update the ripple
+            itr->radius += timedSpeed;
+
+            // if this ripple is outside the attenuation distance
+            if (itr->radius > rippleAttenDist) {
+                // cull it
+                itr = ripples.erase(itr);
+            }
+        }
+    }
 
     // add any new bands
     if (lband > minBandwidth) {
@@ -137,24 +155,6 @@ void ofApp::update() {
             ripples.pop_front();
         }
     }
-
-    // check if there are ripples to update/cull
-    if (ripples.size() > 0) {
-        float timedSpeed = rippleSpeed * ofGetLastFrameTime();
-        // iterate backwards over the vector, erasing the out-of-range ripples
-        for (std::list<Ripple>::iterator itr = ripples.begin(); itr != ripples.end(); ++itr) {
-            // update the ripple
-            itr->radius += timedSpeed;
-
-            // if this ripple is outside the attenuation distance
-            if (itr->radius > rippleAttenDist) {
-                // cull it
-                itr = ripples.erase(itr);
-            }
-        }
-    }
-
-    //printRipples();
 }
 
 void ofApp::printRipples() {
@@ -215,12 +215,18 @@ void ofApp::draw() {
     shader.setUniform4f("sphereCpos", sphereC.getX(), sphereC.getY(), sphereC.getZ(), 1.0f);
     shader.setUniform4f("sphereRpos", sphereR.getX(), sphereR.getY(), sphereR.getZ(), 1.0f);
 
+    // set the shader uniform for the sphere radii
+    shader.setUniform3f("sphereRadii", sphereL.getRadius(), sphereC.getRadius(), sphereR.getRadius());
+
+    // set the uniform describing the first timestep of each band
+    shader.setUniform1f("rippleInitRadius", baseBandradius + rippleSpeed);
+
     // set the uniform for the band strength and attenuation
     shader.setUniform1f("bandStrength", bandStrength);
     shader.setUniform1f("rippleAttenDist", rippleAttenDist);
 
     shader.setUniform1i("nRipples",  ripples.size());
-    
+
     // set the number of ripples
     // arguments are: sampler name, image, texcoord location
     if (ripples.size() > 0) {
@@ -289,7 +295,7 @@ void ofApp::gotMessage(ofMessage msg) {
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo) { 
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }
 
