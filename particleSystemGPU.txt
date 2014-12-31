@@ -1,0 +1,12 @@
+particle system - 2 pass
+Update pass:
+-double buffered, same sized textures for input/output velocity and position (simple can just do position)
+-each point in the texture is a particle, can have a 1024x1024 texture
+-vertex you do almost nothing, but fragment you calculate for each fragment in output buffer (must be same size as input or sampling will be broken)
+Render pass:
+-input texture data as vertices to be rendered as point sprites
+
+particle system - 1 pass (won't work because can't get the texture to update while drawing)
+-can cram the same 2 textures, use multiple render targets to allow for updating
+-pass in the dimensions of the texture and use that to index in, scale from vertex space
+-have each vertex handle a chunk of the texture; if many more vertices than particles then need to have
